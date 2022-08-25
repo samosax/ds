@@ -1,0 +1,357 @@
+#include<iostream>
+using namespace std;
+struct node
+{
+    int data;
+    struct node*lchild;
+    struct node*rchild;
+}*r;
+class AVL
+{
+    struct node *root;
+    struct node *par;
+    struct node *ptr;
+public:
+    int lncnt;
+    AVL()
+    {
+            r=NULL;
+            lncnt=0;
+    }
+    struct node* ins_elt(node *,int);
+    struct node* balance(node*);
+    struct node* LLrotation(node *t);
+    struct node* RRrotation(node *t);
+    struct node* RL(node *);
+    struct node* LR(node *);
+    void search_elt(int);
+    void preorder(node*);
+    void inorder(node *);
+    int ht(node *t);
+    int bfactor(node *t);
+    struct node* del_node(node *,int);
+    struct node* minnode(node *);
+    void printCurrentLevel(node* t, int level);
+    void LevelOrder(node* t);
+    struct node *delmini_node(node *);
+    void countleafnode(node *t);
+    void listofkeys(node *,int a,int b);
+
+};
+struct node* AVL::minnode(node *n)
+{
+    ptr=n;
+    char ch='y';
+    while(ptr->lchild!=NULL)
+    {
+        ptr=ptr->lchild;
+    }
+    return ptr;
+}
+struct node *AVL::delmini_node(node *n)
+{
+   struct node*p=minnode(n);
+   n=del_node(r,p->data);
+   return n;
+}
+struct node* AVL::del_node(node* n,int elt)
+{
+    if(n==NULL)
+    {
+        return n;
+    }
+    else if(elt>n->data)
+    {
+        n->rchild=del_node(n->rchild,elt);
+    }
+    else if(elt<n->data)
+    {
+        n->lchild=del_node(n->lchild,elt);
+    }
+    else
+    {
+        if((n->lchild==NULL)||(n->rchild==NULL))//if single child or no child
+        {
+             node *temp= n->lchild?n->lchild:n->rchild;
+             if(temp==NULL)//if no child
+             {
+                 temp=n;
+                 n=NULL;
+             }
+             else
+             {
+                 *n=*temp;//swap
+             }
+             delete(temp);
+        }
+        else//two child replace with smallest in right subtree and delete that node
+        {
+            node*temp=minnode(n->rchild);
+            n->data=temp->data;
+            n->rchild=del_node(n->rchild,temp->data);
+        }
+    }
+    if(n==NULL)
+    {
+        return n;
+    }
+    n=balance(n);
+}
+struct node* AVL::ins_elt(node *n,int elt)
+{
+    if(n == NULL )
+    {
+        n = new node;
+        n->data = elt;
+        n->lchild = NULL;
+        n->rchild = NULL;
+    }
+    else if(elt<n->data)
+    {
+        n->lchild = ins_elt(n->lchild,elt);
+        n = balance(n);
+    }
+    else if(elt>n->data)
+    {
+        n->rchild = ins_elt(n->rchild,elt);
+        n = balance(n);
+    }
+    return n;
+}
+struct node *AVL::balance(node *b)
+{
+    int bfact = bfactor(b);
+    if (bfact>1)
+    {
+        if(bfactor(b->lchild)>0)
+            b = LLrotation(b);
+        else
+            b = LR(b);
+    }
+    else if(bfact<-1)
+    {
+        if(bfactor(b->rchild)>0)
+            b = RL(b);
+        else
+            b = RRrotation(b);
+    }
+    return b;
+}
+void AVL::search_elt(int item)
+{
+    ptr=r;
+    while(ptr!=NULL)
+    {
+        if(ptr->data==item)
+        {
+            cout<<"Element found!"<<endl;
+            break;
+        }
+        else if(ptr->data<item)
+        {
+            ptr=ptr->rchild;
+        }
+        else if(ptr->data>item)
+        {
+            ptr=ptr->lchild;
+        }
+    }
+    if(ptr==NULL)
+    {
+        cout<<"Element not found"<<endl;
+    }
+
+}
+void AVL::LevelOrder(node* t)
+{
+    int h = ht(t);
+    int i;
+    for (i = 1; i <= h; i++)
+        printCurrentLevel(t, i);
+}
+void AVL::printCurrentLevel(node* t, int level)
+{
+    if (t == NULL)
+        return;
+    if (level == 1)
+        cout << t->data <<endl;
+    else if (level > 1) {
+        printCurrentLevel(t->lchild, level - 1);
+        printCurrentLevel(t->rchild, level - 1);
+    }
+}
+int AVL::ht(node *t)
+{
+    if (t == NULL)
+        return 0;
+    else
+    {
+        int lheight = ht(t->lchild);
+        int rheight = ht(t->rchild);
+        return max(lheight,rheight)+1;
+    }
+}
+int AVL::bfactor(node *t)
+{
+    int lheight = ht(t->lchild);
+    int rheight = ht(t->rchild);
+    int bfact=lheight-rheight;
+    return bfact;
+}
+struct node* AVL::LLrotation(node *A)
+{
+    struct node *k;
+    k=A->lchild;
+    A->lchild=k->rchild;
+    k->rchild=A;
+    cout<<"LL Rotation!"<<endl;
+    return k;
+}
+struct node* AVL::RRrotation(node *A)
+{
+    node *k=A->rchild;
+    A->rchild=k->lchild;
+    k->lchild=A;
+    cout<<"RR rotation!"<<endl;
+    return k;
+}
+struct node *AVL::LR(node *A)
+{
+    A->lchild = RRrotation(A->lchild);
+    node *k = LLrotation(A);
+    cout<<"LR rotation done"<<endl;
+    return k;
+}
+struct node *AVL::RL(node *A)
+{
+    A->rchild = LLrotation(A->rchild);
+    node *k = RRrotation(A);
+    cout<<"RL rotation done"<<endl;
+    return k;
+}
+void AVL::preorder(node *t)
+{
+    if(t!=NULL)
+    {
+        cout<<t->data<<endl;
+        preorder(t->lchild);
+        preorder(t->rchild);
+    }
+    else
+    {
+      return;
+    }
+}
+void AVL::inorder(node *t)
+{
+    if(t!=NULL)
+    {
+        inorder(t->lchild);
+        cout<<t->data<<endl;
+        inorder(t->rchild);
+    }
+    else
+    {
+        return;
+    }
+}
+void AVL::countleafnode(node *t)
+{
+    if(t!=NULL)
+    {
+        countleafnode(t->lchild);
+        if(t->lchild==NULL && t->rchild==NULL)
+        {
+            lncnt++;
+        }
+        countleafnode(t->rchild);
+    }
+}
+void AVL::listofkeys(node *t,int a,int b)
+{
+    if(t!=NULL)
+    {
+        if(t->data>a && t->data<b)
+        {
+            cout<<t->data<<endl;
+        }
+        listofkeys(t->lchild,a,b);
+        listofkeys(t->rchild,a,b);
+    }
+}
+int main()
+{
+    AVL a;
+    char ch='y';
+    while(ch=='y'||ch=='Y')
+    {
+        int choice;
+        cout<<"1.insert element"<<endl<<"2.balance factor"<<endl<<"3.Show balanced AVL tree"<<endl<<"4.levelorder"<<endl<<"5.delete node from avl tree"<<endl<<"6.delete minimum node"<<endl<<"7.search element"<<endl<<"8.Height of the tree"<<endl<<"9.Leaf node count"<<endl<<"10.listofkeys between a and b"<<endl;
+        cout<<"Enter choice:";
+        cin>>choice;
+        if(choice==1)
+        {
+            int elt;
+            cout<<"Enter the element to insert:";
+            cin>>elt;
+            r=a.ins_elt(r,elt);
+        }
+        else if(choice==2)
+        {
+            cout<<a.bfactor(r)<<endl;
+        }
+        else if(choice==3)
+        {
+            cout<<"Inorder Traversal:"<<endl;
+            a.inorder(r);
+            cout << "Preorder Traversal:" << endl;
+            a.preorder(r);
+        }
+        else if(choice==4)
+        {
+            cout<<"Level order:"<<endl;
+            a.LevelOrder(r);
+        }
+        else if(choice==5)
+        {
+            int elt;
+            cout<<"Enter the element you want to delete:";
+            cin>>elt;
+            r=a.del_node(r,elt);
+        }
+        else if(choice==6)
+        {
+            r=a.delmini_node(r);
+            cout<<"Minimum node deleted!"<<endl;
+        }
+        else if(choice==7)
+        {
+            int elt;
+            cout<<"Enter the element to search:";
+            cin>>elt;
+            a.search_elt(elt);
+        }
+        else if(choice==8)
+        {
+            int h=a.ht(r);
+            cout<<"The height of the tree:"<<h-1<<endl;
+        }
+        else if(choice==9)
+        {
+            a.countleafnode(r);
+            cout<<"The leaf node count is:"<<a.lncnt<<endl;
+        }
+        else if(choice==10)
+        {
+            int b,c;
+            cout<<"Enter a:";
+            cin>>b;
+            cout<<"Enter b:";
+            cin>>c;
+            a.listofkeys(r,b,c);
+        }
+        cout<<"Do you wanna continue?(y/n):";
+        cin>>ch;
+    }
+
+}
