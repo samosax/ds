@@ -1,0 +1,186 @@
+#include<iostream>
+using namespace std;
+
+struct Node
+{
+    int data;
+    struct Node *lchild;
+    struct Node *rchild;
+};
+
+class Avltree
+{
+public:
+    Node *root;
+    Avltree()
+    {
+        root = NULL;
+    }
+    int height(Node *r);
+    int balancefactor(Node *n);
+    Node *rightRotate(Node *y);
+    Node *leftRotate(Node *x);
+    Node *Insert(Node *r, Node *newNode);
+    void printLevelOrderBFS(Node * r);
+    void printGivenLevel(Node *r, int level);
+    void printPreorder(Node *r);
+    void printInorder(Node *r);
+};
+
+int Avltree::height(Node *r)
+{
+    if(r == NULL)
+        return -1;
+    else
+    {
+        int lheight = height(r->lchild);
+        int rheight = height(r->rchild);
+        if(lheight > rheight)
+            return lheight+1;
+        else
+            return rheight+1;
+    }
+}
+
+int Avltree::balancefactor(Node *n)
+{
+    if(n == NULL)
+        return -1;
+    else
+        return height(n->lchild) - height(n->rchild);
+}
+
+Node *Avltree::rightRotate(Node *y)
+{
+    Node *x = y->lchild;
+    Node *z = x->rchild;
+    x->rchild = y;
+    y->lchild = z;
+    return x;
+}
+
+Node *Avltree::leftRotate(Node *x)
+{
+    Node *y = x->rchild;
+    Node *z = y->lchild;
+    y->lchild = x;
+    x->rchild = z;
+    return y;
+}
+
+Node *Avltree::Insert(Node *r, Node *newnode)
+{
+    if(r==NULL)
+    {
+        r = newnode;
+        cout<<"Inserted\n";
+        return r;
+    }
+    if(newnode->data < r->data)
+        r->lchild = Insert(r->lchild, newnode);
+    else if(newnode->data > r->data)
+        r->rchild = Insert(r->rchild, newnode);
+    else
+    {
+        cout<<"No Duplicate Values Allowed";
+        return r;
+    }
+    int bf = balancefactor(r);
+
+    //Left Left case
+    if(bf > 1 && newnode->data < r->lchild->data)
+    {
+        cout<<"LL Rotation Called!\n";
+        return rightRotate(r);
+
+    //Right Right case
+    if(bf < -1 && newnode->data < r->rchild->data)
+        {
+            cout<<"RR Rotation Called!\n";
+            return leftRotate(r);
+        }
+
+    //Left Right case
+    if(bf > 1 && newnode->data > r->lchild->data)
+    {
+        cout<<"LR Rotation Called!\n";
+        r->lchild = leftRotate(r->lchild);
+        return rightRotate(r);
+    }
+
+    //Right Left case
+    if(bf < -1 && newnode->data < r->rchild->data)
+    {
+        cout<<"RL Rotation Called!\n";
+        r->rchild = rightRotate(r->rchild);
+        return leftRotate(r);
+    }
+    }
+    return r;
+}
+
+void Avltree::printGivenLevel(Node * r, int level) {
+    if (r == NULL)
+      return;
+    else if (level == 0)
+      cout << r -> data << "-> ";
+    else // level > 0
+    {
+      printGivenLevel(r -> lchild, level - 1);
+      printGivenLevel(r -> rchild, level - 1);
+    }
+  }
+
+ void Avltree::printLevelOrderBFS(Node * r) {
+    int h = height(r);
+    for (int i = 0; i <= h; i++)
+      printGivenLevel(r, i);
+  }
+
+void Avltree::printPreorder(Node * r) //(current node, Left, Right)
+  {
+    if (r == NULL)
+      return;
+    /* first print data of node */
+    cout << r -> data << " ";
+    /* then recur on left sutree */
+    printPreorder(r -> lchild);
+    /* now recur on right subtree */
+    printPreorder(r -> rchild);
+  }
+
+
+void Avltree::printInorder(Node * r) //  (Left, current node, Right)
+{
+    if (r == NULL)
+        return;
+    /* first recur on left child */
+    printInorder(r -> lchild);
+    /* then print the data of node */
+    cout << r -> data << " ";
+    /* now recur on right child */
+    printInorder(r -> rchild);
+}
+
+int main()
+{
+    int val, n;
+    Avltree obj;
+    cout<<"No of values to be inserted: ";
+    cin>>n;
+    for(int i = 0;i < n;i++)
+    {
+        Node *newnode = new Node();
+        cout<<"\nEnter the value: ";
+        cin>>val;
+        newnode->data = val;
+        obj.root = obj.Insert(obj.root, newnode);
+        obj.printLevelOrderBFS(obj.root);
+    }
+    cout<<"\nPRE ORDER ";
+    obj.printPreorder(obj.root);
+    cout<<"\nINORDER ";
+    obj.printInorder(obj.root);
+    cout<<"\nHeight Of Tree: "<<obj.height(obj.root);
+
+}
