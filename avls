@@ -25,6 +25,9 @@ public:
     void printGivenLevel(Node *r, int level);
     void printPreorder(Node *r);
     void printInorder(Node *r);
+    Node *minValueNode(Node *node);
+    Node *deleteNode(Node *r, int v);
+    Node *recursiveSearch(Node *r, int val);
 };
 
 int Avltree::height(Node *r)
@@ -162,6 +165,88 @@ void Avltree::printInorder(Node * r) //  (Left, current node, Right)
     printInorder(r -> rchild);
 }
 
+Node *Avltree::minValueNode(Node * node) {
+    Node * current = node;
+    /* loop down to find the leftmost leaf */
+    while (current -> lchild != NULL) {
+      current = current -> lchild;
+    }
+    return current;
+}
+
+Node *Avltree::deleteNode(Node * r, int v) {
+    // base case
+    if (r == NULL) {
+      return NULL;
+    }
+    // If the key to be deleted is smaller than the root's key,
+    // then it lies in left subtree
+    else if (v < r -> data) {
+      r -> lchild = deleteNode(r -> lchild, v);
+    }
+    // If the key to be deleted is greater than the root's key,
+    // then it lies in right subtree
+    else if (v > r -> data) {
+      r -> rchild = deleteNode(r -> rchild, v);
+    }
+    // if key is same as root's key, then This is the node to be deleted
+    else {
+      // node with only one child or no child
+      if (r -> lchild == NULL) {
+        Node * temp = r -> rchild;
+        delete r;
+        return temp;
+      } else if (r -> rchild == NULL) {
+        Node * temp = r -> lchild;
+        delete r;
+        return temp;
+      } else {
+        // node with two children: Get the inorder successor (smallest
+        // in the right subtree)
+        Node * temp = minValueNode(r -> rchild);
+        // Copy the inorder successor's content to this node
+        r -> data = temp -> data;
+        // Delete the inorder successor
+        r -> rchild = deleteNode(r -> rchild, temp -> data);
+        //deleteNode(r->right, temp->value);
+      }
+    }
+
+    int bf = balancefactor(r);
+    // Left Left Imbalance/Case or Right rotation
+    if (bf == 2 && balancefactor(r -> lchild) >= 0)
+      return rightRotate(r);
+    // Left Right Imbalance/Case or LR rotation
+    else if (bf == 2 && balancefactor(r -> lchild) == -1) {
+      r -> lchild = leftRotate(r -> lchild);
+      return rightRotate(r);
+    }
+    // Right Right Imbalance/Case or Left rotation
+    else if (bf == -2 && balancefactor(r -> rchild) <= -0)
+      return leftRotate(r);
+    // Right Left Imbalance/Case or RL rotation
+    else if (bf == -2 && balancefactor(r -> rchild) == 1) {
+      r -> rchild = rightRotate(r -> rchild);
+      return leftRotate(r);
+    }
+    return r;
+
+}
+
+Node *Avltree::recursiveSearch(Node * r, int val) {
+    if (r == NULL || r -> data == val)
+      return r;
+
+    else if (val < r -> data)
+      return recursiveSearch(r -> lchild, val);
+
+    else
+      return recursiveSearch(r -> rchild, val);
+  }
+
+
+
+
 int main()
 {
     int val, n;
@@ -182,5 +267,16 @@ int main()
     cout<<"\nINORDER ";
     obj.printInorder(obj.root);
     cout<<"\nHeight Of Tree: "<<obj.height(obj.root);
-
+    cout<<"\nMinimum value node: "<<obj.minValueNode(obj.root);\
+    cout<<"Enter the value to be deleted: ";
+    cin>>val;
+    Node *new_node = obj.recursiveSearch(obj.root, val);
+    if (new_node != NULL) {
+        obj.root = obj.deleteNode(obj.root, val);
+        cout << "Value Deleted" << endl;
+      } else {
+        cout << "Value NOT found" << endl;
+      }
+    obj.printPreorder(obj.root);
 }
+
