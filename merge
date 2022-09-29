@@ -1,0 +1,74 @@
+/* MERGE SORT */
+#include<iostream>
+using namespace std;
+
+
+void merge_Array(int [],int [],int,int [],int);
+void merge_Sort(int a[],int n)
+{
+    if(n>1)
+    {
+         int b[n/2],c[n-n/2],k=0;
+         for(int i=0;i<n/2;i++)
+         {
+             b[i]=a[i];
+         }
+         for(int i=n/2;i<n;i++)
+         {
+             c[k++]=a[i];
+         }
+         merge_Sort(b,n/2);
+         merge_Sort(c,n-n/2);
+         merge_Array(a,b,n/2,c,n-n/2);
+
+    }
+
+}
+
+void merge_Array(int a[],int b[],int sb,int c[],int sc)
+{
+    int i,j,k;
+    i=0,j=0,k=0;
+    while(i<sb && j<sc)
+    {
+        if(b[i]<=c[j])
+        {
+            a[k++]=b[i];
+            i++;
+        }
+        else if(b[i]>c[j])
+        {
+            a[k++]=c[j];
+            j++;
+        }
+    }
+    while(i<sb)
+    {
+        a[k++]=b[i];
+        i++;
+    }
+    while(j<sc)
+    {
+        a[k++]=c[j];
+        j++;
+    }
+}
+
+int main()
+{
+    int i,j,k;
+    int a[10];
+    cout<<"Enter the 10 array elements :"<<endl;
+    for(i=0;i<10;i++)
+    {
+        cin>>a[i];
+    }
+    cout<<"The array after Merge sort :"<<endl;
+    merge_Sort(a,10);
+    for(i=0;i<10;i++)
+    {
+        cout<<a[i]<<"-->";
+    }
+    return 0;
+}
+
