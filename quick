@@ -1,0 +1,56 @@
+/*Design and Analysis of Algorithms Lab
+Quick Sort
+Date: 16-09-2022*/
+
+#include<iostream>
+using namespace std;
+
+int partition(int a[], int l, int h)
+{
+    int p = a[l];
+    int i=l+1, j=h;
+    while(i<j)
+    {
+        while(a[i]<=p)
+            i++;
+        while(a[j]>p)
+            j--;
+        if(i<j)
+        {
+            int temp=a[j];
+            a[j]=a[i];
+            a[i]=temp;
+        }
+    }
+    int temp=a[j];
+    a[j]=a[l];
+    a[l]=temp;
+    return j;
+}
+
+
+void quicksort(int a[], int l, int h)
+{
+    if(l<h)
+    {
+        int s=partition(a,l,h);
+        quicksort(a,l,s-1);
+        quicksort(a,s+1,h);
+
+    }
+}
+
+int main()
+{
+    int i, n;
+    cout<<"\nEnter the number of Elements: ";
+    cin>>n;
+    int a[n];
+    cout<<"\nEnter the Elements: "<<endl;
+    for(i=0;i<n;i++)
+        cin>>a[i];
+    quicksort(a,0,n-1);
+    cout<<"\nThe Elements after Sorting: "<<endl;
+    for(i=0;i<n;i++)
+        cout<<a[i]<<" ";
+}
