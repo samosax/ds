@@ -3,17 +3,13 @@
 #include <algorithm>
 using namespace std;
  
-// Function to segment a given string into a space-separated
+// Function to determine if a string can be segmented into space-separated
 // sequence of one or more dictionary words
-void wordBreak(vector<string> const &dict, string word, string out)
+bool wordBreak(vector<string> const &dict, string word)
 {
-    // if the end of the string is reached,
-    // print the output string
- 
-    if (word.size() == 0)
-    {
-        cout << out << endl;
-        return;
+    // return true if the end of the string is reached
+    if (word.size() == 0) {
+        return true;
     }
  
     for (int i = 1; i <= word.size(); i++)
@@ -21,13 +17,18 @@ void wordBreak(vector<string> const &dict, string word, string out)
         // consider all prefixes of the current string
         string prefix = word.substr(0, i);
  
-        // if the prefix is present in the dictionary, add it to the
-        // output string and recur for the remaining string
+        // return true if the prefix is present in the dictionary and the remaining
+        // string also forms a space-separated sequence of one or more
+        // dictionary words
  
-        if (find(dict.begin(), dict.end(), prefix) != dict.end()) {
-            wordBreak(dict, word.substr(i), out + " " + prefix);
+        if (find(dict.begin(), dict.end(), prefix) != dict.end() &&
+                wordBreak(dict, word.substr(i))) {
+            return true;
         }
     }
+ 
+    // return false if the string can't be segmented
+    return false;
 }
  
 // Word Break Problem Implementation in C++
@@ -42,7 +43,12 @@ int main()
     // input string
     string word = "Wordbreakproblem";
  
-    wordBreak(dict, word, "");
+    if (wordBreak(dict, word)) {
+        cout << "The string can be segmented";
+    }
+    else {
+        cout << "The string can't be segmented";
+    }
  
     return 0;
 }
